@@ -12,7 +12,7 @@ export default function (webstoreUrl) {
     if (!extId) {
       return window.chrome.webstore.install(webstoreUrl, function () {
         setTimeout(function () {
-          window.sessionStorage.getScreenMediaExtensionId = webstoreUrl.split('/').pop();
+          window.sessionStorage.getScreenMediaJSExtensionId = webstoreUrl.split('/').pop();
           handleMessage(event);
         }, 2500);
       });
