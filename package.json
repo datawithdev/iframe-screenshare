@@ -1,6 +1,6 @@
 {
   "name": "iframe-screenshare",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "Utility for an application to enable screen sharing in an iframed window",
   "main": "src/index.js",
   "directories": {
