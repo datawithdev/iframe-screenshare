@@ -1,7 +1,7 @@
 ---
 language: node_js
 node_js:
-  - "4.4.0"
+  - "4.5.0"
 
 sudo: false
 
@@ -11,6 +11,8 @@ cache:
 
 matrix:
   fast_finish: true
+
+before_install: if [[ `npm -v` != 3* ]]; then npm i -g npm@3; fi
 
 install:
   - npm install
