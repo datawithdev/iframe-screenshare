@@ -8,7 +8,9 @@
   },
   "scripts": {
     "lint": "node_modules/.bin/semistandard",
-    "build": "node_modules/rollup/bin/rollup -c",
+    "build-umd": "node_modules/rollup/bin/rollup --config rollup.config.umd.js",
+    "build-cjs": "node_modules/rollup/bin/rollup --config rollup.config.cjs.js",
+    "build": "npm run build-cjs && npm run build-umd",
     "prepublish": "npm run build && npm run _test",
     "_test": "node_modules/.bin/mocha --compilers js:babel-core/register test/test.js",
     "test-server": "npm run _test -- -w",
