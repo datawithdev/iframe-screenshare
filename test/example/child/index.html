@@ -2,7 +2,7 @@
 <html>
 <head>
     <title>Child app</title>
-    <script type="text/javascript" src="bower_components/localmedia/localMedia.bundle.js"></script>
+    <script src="https://localhost.mypurecloud.com:8444/out/iframe-screenshare.js" type="text/javascript"></script>
 </head>
 <body>
     <h1> Child app </h1>
@@ -10,38 +10,16 @@
 
     <button id="gobutton">Go</button>
     <script type="text/javascript">
-        window.onmessage = function (e) {
-            console.log('child got message', e.data);
-            source = e.source;
-
-            if (!e.data || !e.data.sourceId) {
-                console.log('user cancelled');
-                return;
-            }
-
-            var constraints = {
-                audio: false,
-                video: {
-                    mandatory: {
-                        chromeMediaSource: 'desktop',
-                        maxWidth: window.screen.width,
-                        maxHeight: window.screen.height,
-                        maxFrameRate: 15,
-                        chromeMediaSourceId: e.data.sourceId
-                    }
-                }
-            };
-            window.navigator.mediaDevices.getUserMedia(constraints).then(function (mediaStream) {
-                console.log('got screen in child', mediaStream)
-                var v = document.createElement('video');
-                document.body.appendChild(v);
-                v.srcObject = mediaStream;
-                v.autoplay = 'autoplay';
-            }).catch(function (err) { console.error(err); });
-        }
         function sendMessageToParent() {
-            console.log('child sending message');
-            window.parent.postMessage({ type: 'getScreen', id: 1, url: 'https://localhost.mypurecloud.com:8446' }, 'https://localhost.quicken.com:8445');
+          requestScreenShare().then(function(mediaStream) {
+            console.log('got screen in child', mediaStream)
+            var v = document.createElement('video');
+            document.body.appendChild(v);
+            v.srcObject = mediaStream;
+            v.autoplay = 'autoplay';
+          }, function (err) {
+            console.error(err);
+          });
         }
         document.getElementById('gobutton').onclick = sendMessageToParent;
     </script>

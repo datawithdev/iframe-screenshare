@@ -2,15 +2,13 @@
   "name": "iframe-screenshare",
   "version": "2.0.1",
   "description": "Utility for an application to enable screen sharing in an iframed window",
-  "main": "src/index.js",
+  "main": "out/iframe-screenshare.min.js",
   "directories": {
     "test": "test"
   },
   "scripts": {
     "lint": "node_modules/.bin/semistandard",
-    "build-umd": "node_modules/rollup/bin/rollup --config rollup.config.umd.js",
-    "build-cjs": "node_modules/rollup/bin/rollup --config rollup.config.cjs.js",
-    "build": "npm run build-cjs && npm run build-umd",
+    "build": "node_modules/rollup/bin/rollup --config rollup.config.js",
     "prepublish": "npm run build && npm run _test",
     "_test": "node_modules/.bin/mocha --compilers js:babel-core/register test/test.js",
     "test-server": "./watch-tests.sh",

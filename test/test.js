@@ -7,7 +7,7 @@ if (typeof window === 'undefined') {
 
 import { assert } from 'chai';
 import sinon from 'sinon';
-import screenShare from '../out/iframe-screenshare.min.js';
+import { initializeScreenShare, requestScreenShare } from '../';
 import { EventEmitter } from 'events';
 
 class Window extends EventEmitter {
@@ -22,6 +22,8 @@ class Window extends EventEmitter {
       }
     };
     this.sessionStorage = {};
+    this.location = { origin: 'https://examplesrus.com' };
+    this.screen = { width: 100, height: 100 };
   }
 
   addEventListener (event, func) {
@@ -29,11 +31,11 @@ class Window extends EventEmitter {
   }
 
   postMessage (message) {
-    this.emit('message', message);
+    this.emit('message', { data: message });
   }
 }
 
-describe('screenShare', function () {
+describe('requestScreenShare', function () {
   let sandbox;
   beforeEach(function () {
     if (USE_MOCK_WINDOW) {
@@ -47,20 +49,94 @@ describe('screenShare', function () {
   });
 
   it('runs', function () {
-    screenShare();
+    requestScreenShare();
+    assert.ok(true);
+  });
+
+  it('will not set up a window event listener for message if not in chrome', function (done) {
+    sandbox.spy(window, 'addEventListener');
+    window.chrome = null;
+    requestScreenShare().then(() => {
+      assert.ok(false, 'result should not have resolved');
+    }, (err) => {
+      assert.ok(err);
+      sinon.assert.notCalled(window.addEventListener);
+      done();
+    });
+  });
+
+  it('will immediately call getUserMedia if not in chrome, and getUserMedia exists', function (done) {
+    window.navigator = {
+      mediaDevices: {
+        getUserMedia: () => {}
+      }
+    };
+    window.chrome = null;
+    sandbox.stub(window.navigator.mediaDevices, 'getUserMedia', (constraints) => {
+      assert.equal(constraints.audio, false);
+      assert.equal(constraints.video.mediaSource, 'window');
+      done();
+    });
+    requestScreenShare();
+  });
+
+  it('will request screen share via the chrome iframe method and resolve', function (done) {
+    const sourceId = '123591911019385';
+    const mockStream = {};
+    window.navigator = {
+      mediaDevices: {
+        getUserMedia: () => {}
+      }
+    };
+    window.parent = {
+      postMessage: () => {}
+    };
+    sandbox.stub(window.parent, 'postMessage', function (options) {
+      assert.equal(options.type, 'getScreen');
+      assert.equal(options.url, window.location.origin);
+      window.postMessage({ sourceId });
+    });
+    sandbox.stub(window.navigator.mediaDevices, 'getUserMedia', function (constraints) {
+      assert.equal(constraints.audio, false);
+      assert.equal(constraints.video.mandatory.chromeMediaSource, 'desktop');
+      assert.equal(constraints.video.mandatory.chromeMediaSourceId, sourceId);
+      return Promise.resolve(mockStream);
+    });
+    requestScreenShare().then((stream) => {
+      assert.equal(stream, mockStream);
+      done();
+    });
+  });
+});
+
+describe('initializeScreenShare', function () {
+  let sandbox;
+  beforeEach(function () {
+    if (USE_MOCK_WINDOW) {
+      GLOBAL.window = new Window();
+    }
+    sandbox = sinon.sandbox.create();
+  });
+
+  afterEach(function () {
+    sandbox.restore();
+  });
+
+  it('runs', function () {
+    initializeScreenShare();
     assert.ok(true);
   });
 
   it('will not set up a window event listener for message if not in chrome', function () {
     sandbox.spy(window, 'addEventListener');
     window.chrome = null;
-    screenShare();
+    initializeScreenShare();
     sinon.assert.notCalled(window.addEventListener);
   });
 
   it('will set up a window event listener for a message if in chrome', function () {
     sandbox.spy(window, 'addEventListener');
-    screenShare();
+    initializeScreenShare();
     sinon.assert.calledOnce(window.addEventListener);
     sinon.assert.calledWithExactly(window.addEventListener, 'message', sinon.match.func);
   });
@@ -71,17 +147,15 @@ describe('screenShare', function () {
       const webstoreUrl = `https://test.example/test/${extensionId}`;
       window.sessionStorage.getScreenMediaJSExtensionId = extensionId;
       const windowEvent = {
-        data: {
-          type: 'getScreen'
-        }
+        type: 'getScreen'
       };
       sandbox.stub(window.chrome.runtime, 'sendMessage', function (extId, data, callback) {
         assert.equal(extId, extensionId);
-        assert.equal(data, windowEvent.data);
+        assert.equal(data, windowEvent);
         assert.equal(typeof callback, 'function');
         done();
       });
-      screenShare(webstoreUrl);
+      initializeScreenShare(webstoreUrl);
       window.postMessage(windowEvent);
     });
 
@@ -97,11 +171,9 @@ describe('screenShare', function () {
       sandbox.stub(window.chrome.runtime, 'sendMessage', function () {
         done();
       });
-      screenShare(webstoreUrl);
+      initializeScreenShare(webstoreUrl);
       window.postMessage({
-        data: {
-          type: 'getScreen'
-        }
+        type: 'getScreen'
       });
     });
 
@@ -115,11 +187,9 @@ describe('screenShare', function () {
         done();
       });
       window.sessionStorage.getScreenMediaJSExtensionId = '1234';
-      screenShare(webstoreUrl);
+      initializeScreenShare(webstoreUrl);
       window.postMessage({
-        data: {
-          type: 'getScreen'
-        }
+        type: 'getScreen'
       });
     });
   });
