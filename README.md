@@ -32,11 +32,13 @@ capture for screen sharing in an embedded PureCloud popover iframe.
 
 ## API
 
+#### Parent Window
 ```javascript
 // webstore url for inline installation is optional
 const webstoreUrl = 'https://chrome.google.com/webstore/detail/hkgejheiebikekdmadhjgohfofafldbe';
 
-import initializeScreenShare from '../out/iframe-screenshare.min.js';
+import { initializeScreenShare } from 'iframe-screenshare';
+// or `const { initializeScreenShare } = require('iframe-screenshare');`
 initializeScreenShare(webstoreUrl);
 
 ```
@@ -46,18 +48,26 @@ or
 ```html
 <script src="/iframe-screenshare.min.js" type="text/javascript"></script>
 <script type="text/javascript">
-  initializeScreenShare()
+  iframeScreenshare.initializeScreenShare()
 </script>
 ```
 
+#### Child Frame
+```javascript
+import { requestScreenShare } from 'iframe-screenshare';
+// or `const { requestScreenShare } = require('iframe-screenshare');`
+requestScreenShare();
 
+```
 
+or
 
-
-
-
-### Under development
-This package is not yet ready for public use.
+```html
+<script src="/iframe-screenshare.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+  iframeScreenshare.requestScreenShare()
+</script>
+```
 
 [1]:https://travis-ci.org/MyPureCloud/iframe-screenshare.svg?branch=master
 [2]:https://travis-ci.org/MyPureCloud/iframe-screenshare
