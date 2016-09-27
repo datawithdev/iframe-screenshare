@@ -1,5 +1,5 @@
 # iFrame Screenshare
-[![Build Status][1]][2]
+[![Build Status][1]][2] [![npm version][5]][6]
 
 ## Purpose
 
@@ -63,3 +63,5 @@ This package is not yet ready for public use.
 [2]:https://travis-ci.org/MyPureCloud/iframe-screenshare
 [3]:http://chimera.labs.oreilly.com/books/1230000000545/ch18.html
 [4]:https://cloud.githubusercontent.com/assets/833911/18876974/b1c8da72-8499-11e6-95c3-650952c80e4f.png
+[5]:https://badge.fury.io/js/iframe-screenshare.svg
+[6]:https://badge.fury.io/js/iframe-screenshare
