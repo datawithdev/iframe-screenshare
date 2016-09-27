@@ -6,5 +6,5 @@ export default {
   format: 'umd',
   plugins: [ babel(), uglify() ],
   dest: 'out/iframe-screenshare.min.js',
-  moduleName: 'initializeScreenShare'
+  moduleName: 'iframeScreenshare'
 };

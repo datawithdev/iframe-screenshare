@@ -58,7 +58,7 @@ const requestScreenShare = function (constraints) {
         };
         window.navigator.mediaDevices.getUserMedia(chromeConstraints).then(resolve, reject);
       });
-      window.parent.postMessage({ type: 'getScreen', id: 1, url: window.location.origin });
+      window.parent.postMessage({ type: 'getScreen', id: 1, url: window.location.origin }, '*');
     });
   }
 };
