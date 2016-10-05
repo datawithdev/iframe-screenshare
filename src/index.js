@@ -44,7 +44,7 @@ const requestScreenShare = function (constraints) {
         if (!event || !event.data.sourceId) {
           return reject(new Error('User Cancellation'));
         }
-        const chromeConstraints = (constraints && constraints.firefox) || {
+        const chromeConstraints = (constraints && constraints.chrome) || {
           audio: false,
           video: {
             mandatory: {
