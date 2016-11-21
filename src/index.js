@@ -10,12 +10,16 @@ const initializeScreenShare = function (webstoreUrl) {
     }
     const extId = window.sessionStorage.getScreenMediaJSExtensionId;
     if (!extId) {
-      return window.chrome.webstore.install(webstoreUrl, function () {
-        setTimeout(function () {
-          window.sessionStorage.getScreenMediaJSExtensionId = webstoreUrl.split('/').pop();
-          handleMessage(event);
-        }, 2500);
-      });
+      try {
+        return window.chrome.webstore.install(webstoreUrl, function () {
+          setTimeout(function () {
+            window.sessionStorage.getScreenMediaJSExtensionId = webstoreUrl.split('/').pop();
+            handleMessage(event);
+          }, 2500);
+        });
+      } catch (e) {
+        return event.source.postMessage({ err: e }, '*');
+      }
     }
     window.chrome.runtime.sendMessage(extId, event.data, function (data) {
       event.source.postMessage(data, '*');
@@ -42,6 +46,9 @@ const requestScreenShare = function (constraints) {
     return new Promise(function (resolve, reject) {
       window.addEventListener('message', function (event) {
         if (!event || !event.data.sourceId) {
+          if (event.data.err) {
+            return reject(event.data.err);
+          }
           return reject(new Error('User Cancellation'));
         }
         const chromeConstraints = (constraints && constraints.chrome) || {

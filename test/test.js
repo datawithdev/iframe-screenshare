@@ -30,8 +30,8 @@ class Window extends EventEmitter {
     this.on(event, func);
   }
 
-  postMessage (message) {
-    this.emit('message', { data: message });
+  postMessage (message, source) {
+    this.emit('message', { data: message, source });
   }
 }
 
@@ -39,7 +39,7 @@ describe('requestScreenShare', function () {
   let sandbox;
   beforeEach(function () {
     if (USE_MOCK_WINDOW) {
-      GLOBAL.window = new Window();
+      global.window = new Window();
     }
     sandbox = sinon.sandbox.create();
   });
@@ -113,7 +113,7 @@ describe('initializeScreenShare', function () {
   let sandbox;
   beforeEach(function () {
     if (USE_MOCK_WINDOW) {
-      GLOBAL.window = new Window();
+      global.window = new Window();
     }
     sandbox = sinon.sandbox.create();
   });
@@ -191,6 +191,24 @@ describe('initializeScreenShare', function () {
       window.postMessage({
         type: 'getScreen'
       });
+    });
+
+    it('will post an error message back if install fails.', function (done) {
+      const webstoreUrl = 'https://test.example';
+      sandbox.stub(window.chrome.webstore, 'install', function (url, callback) {
+        throw new Error('Chrome Web Store installations can only be initated by a user gesture.');
+      });
+      const frameWindow = {
+        postMessage: () => {}
+      };
+      sandbox.stub(frameWindow, 'postMessage', function (msg) {
+        assert.ok(msg.err);
+        done();
+      });
+      initializeScreenShare(webstoreUrl);
+      window.postMessage({
+        type: 'getScreen'
+      }, frameWindow);
     });
   });
 });
