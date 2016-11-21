@@ -210,5 +210,31 @@ describe('initializeScreenShare', function () {
         type: 'getScreen'
       }, frameWindow);
     });
+
+    it('will will install the extension but not request media if installOnly is provided', function (done) {
+      this.timeout(3000); // the install process has a timeout of 2500
+
+      const webstoreUrl = 'https://test.example';
+      sandbox.stub(window.chrome.webstore, 'install', function (url, callback) {
+        assert.equal(url, webstoreUrl);
+        assert.equal(typeof callback, 'function');
+        callback();
+      });
+      sandbox.stub(window.chrome.runtime, 'sendMessage', function () {
+        assert.ok(false, 'Passed message to extension after installing.');
+      });
+      const frameWindow = {
+        postMessage: () => {}
+      };
+      sandbox.stub(frameWindow, 'postMessage', function (msg) {
+        assert.ok(msg.installOnly);
+        done();
+      });
+      initializeScreenShare(webstoreUrl);
+      window.postMessage({
+        type: 'getScreen',
+        installOnly: true
+      }, frameWindow);
+    });
   });
 });

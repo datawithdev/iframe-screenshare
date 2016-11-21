@@ -14,6 +14,9 @@ const initializeScreenShare = function (webstoreUrl) {
         return window.chrome.webstore.install(webstoreUrl, function () {
           setTimeout(function () {
             window.sessionStorage.getScreenMediaJSExtensionId = webstoreUrl.split('/').pop();
+            if (event.data.installOnly) {
+              return event.source.postMessage(event.data, '*');
+            }
             handleMessage(event);
           }, 2500);
         });
@@ -28,7 +31,7 @@ const initializeScreenShare = function (webstoreUrl) {
   window.addEventListener('message', handleMessage);
 };
 
-const requestScreenShare = function (constraints) {
+const requestScreenShare = function (constraints, installOnly) {
   if (!window.navigator || !window.navigator.mediaDevices ||
       !window.navigator.mediaDevices.getUserMedia) {
     if (!Promise) {
@@ -37,6 +40,9 @@ const requestScreenShare = function (constraints) {
     return Promise.reject('Unsupported');
   }
   if (!window.chrome) {
+    if (installOnly) {
+      return;
+    }
     const ffConstraints = (constraints && constraints.firefox) || {
       audio: false,
       video: { mediaSource: 'window' }
@@ -48,6 +54,9 @@ const requestScreenShare = function (constraints) {
         if (!event || !event.data.sourceId) {
           if (event.data.err) {
             return reject(event.data.err);
+          }
+          if (event.data.installOnly) {
+            return resolve(event.data);
           }
           return reject(new Error('User Cancellation'));
         }
@@ -65,7 +74,7 @@ const requestScreenShare = function (constraints) {
         };
         window.navigator.mediaDevices.getUserMedia(chromeConstraints).then(resolve, reject);
       });
-      window.parent.postMessage({ type: 'getScreen', id: 1, url: window.location.origin }, '*');
+      window.parent.postMessage({ type: 'getScreen', installOnly, id: 1, url: window.location.origin }, '*');
     });
   }
 };
