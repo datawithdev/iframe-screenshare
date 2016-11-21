@@ -11,17 +11,18 @@ const initializeScreenShare = function (webstoreUrl) {
     const extId = window.sessionStorage.getScreenMediaJSExtensionId;
     if (!extId) {
       try {
+        const getScreenMediaJSExtensionId = webstoreUrl.split('/').pop();
         return window.chrome.webstore.install(webstoreUrl, function () {
           setTimeout(function () {
-            window.sessionStorage.getScreenMediaJSExtensionId = webstoreUrl.split('/').pop();
+            window.sessionStorage.getScreenMediaJSExtensionId = getScreenMediaJSExtensionId;
             if (event.data.installOnly) {
               return event.source.postMessage(event.data, '*');
             }
             handleMessage(event);
           }, 2500);
         });
-      } catch (e) {
-        return event.source.postMessage({ err: e }, '*');
+      } catch (err) {
+        return event.source.postMessage({ err }, '*');
       }
     }
     window.chrome.runtime.sendMessage(extId, event.data, function (data) {
