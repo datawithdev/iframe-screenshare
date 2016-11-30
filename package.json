@@ -9,7 +9,7 @@
   "scripts": {
     "lint": "semistandard",
     "build": "rollup --config rollup.config.js",
-    "prepublish": "npm run build && npm run _test",
+    "prepublish": "npm run build && npm run test",
     "cover": "istanbul check-coverage --branches 64 --lines 85 --functions 84 coverage/coverage-final.json",
     "_test": "istanbul --report=json --report=html cover _mocha",
     "test_no_coverage": "node_modules/.bin/mocha --compilers js:babel-core/register test/test.js",
