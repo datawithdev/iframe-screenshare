@@ -1,4 +1,6 @@
 # iFrame Screenshare
+
+[![Greenkeeper badge](https://badges.greenkeeper.io/MyPureCloud/iframe-screenshare.svg)](https://greenkeeper.io/)
 [![Build Status][1]][2] [![npm version][5]][6]
 
 ## Purpose
