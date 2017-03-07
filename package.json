@@ -48,7 +48,7 @@
     "rollup": "^0.41.4",
     "rollup-plugin-babel": "^2.6.1",
     "rollup-plugin-uglify": "^1.0.1",
-    "semistandard": "^9.0.0",
+    "semistandard": "^10.0.0",
     "sinon": "^1.17.6",
     "uglify-js": "^2.7.3"
   },

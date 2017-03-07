@@ -38,7 +38,7 @@ const requestScreenShare = function (constraints, installOnly) {
     if (!Promise) {
       throw new Error('requestScreenShare called in unsupported browser');
     }
-    return Promise.reject('Unsupported');
+    return Promise.reject(new Error('Unsupported'));
   }
   if (!window.chrome) {
     if (installOnly) {
