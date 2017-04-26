@@ -1,14 +1,14 @@
 /* global describe, it, beforeEach, afterEach */
 
-let USE_MOCK_WINDOW = false;
-if (typeof window === 'undefined') {
-  USE_MOCK_WINDOW = true;
-}
-
 import { assert } from 'chai';
 import sinon from 'sinon';
 import { initializeScreenShare, requestScreenShare } from '../';
 import { EventEmitter } from 'events';
+
+let USE_MOCK_WINDOW = false;
+if (typeof window === 'undefined') {
+  USE_MOCK_WINDOW = true;
+}
 
 class Window extends EventEmitter {
   constructor () {
@@ -72,7 +72,7 @@ describe('requestScreenShare', function () {
       }
     };
     window.chrome = null;
-    sandbox.stub(window.navigator.mediaDevices, 'getUserMedia', (constraints) => {
+    sandbox.stub(window.navigator.mediaDevices, 'getUserMedia').callsFake((constraints) => {
       assert.equal(constraints.audio, false);
       assert.equal(constraints.video.mediaSource, 'window');
       done();
@@ -91,12 +91,12 @@ describe('requestScreenShare', function () {
     window.parent = {
       postMessage: () => {}
     };
-    sandbox.stub(window.parent, 'postMessage', function (options) {
+    sandbox.stub(window.parent, 'postMessage').callsFake(function (options) {
       assert.equal(options.type, 'getScreen');
       assert.equal(options.url, window.location.origin);
       window.postMessage({ sourceId });
     });
-    sandbox.stub(window.navigator.mediaDevices, 'getUserMedia', function (constraints) {
+    sandbox.stub(window.navigator.mediaDevices, 'getUserMedia').callsFake(function (constraints) {
       assert.equal(constraints.audio, false);
       assert.equal(constraints.video.mandatory.chromeMediaSource, 'desktop');
       assert.equal(constraints.video.mandatory.chromeMediaSourceId, sourceId);
@@ -149,7 +149,7 @@ describe('initializeScreenShare', function () {
       const windowEvent = {
         type: 'getScreen'
       };
-      sandbox.stub(window.chrome.runtime, 'sendMessage', function (extId, data, callback) {
+      sandbox.stub(window.chrome.runtime, 'sendMessage').callsFake(function (extId, data, callback) {
         assert.equal(extId, extensionId);
         assert.equal(data, windowEvent);
         assert.equal(typeof callback, 'function');
@@ -163,12 +163,12 @@ describe('initializeScreenShare', function () {
       this.timeout(3000); // the install process has a timeout of 2500
 
       const webstoreUrl = 'https://test.example';
-      sandbox.stub(window.chrome.webstore, 'install', function (url, callback) {
+      sandbox.stub(window.chrome.webstore, 'install').callsFake(function (url, callback) {
         assert.equal(url, webstoreUrl);
         assert.equal(typeof callback, 'function');
         callback();
       });
-      sandbox.stub(window.chrome.runtime, 'sendMessage', function () {
+      sandbox.stub(window.chrome.runtime, 'sendMessage').callsFake(function () {
         done();
       });
       initializeScreenShare(webstoreUrl);
@@ -179,10 +179,10 @@ describe('initializeScreenShare', function () {
 
     it('will not attempt to install the chrome extension if it appears to exist', function (done) {
       const webstoreUrl = 'https://test.example';
-      sandbox.stub(window.chrome.webstore, 'install', function (url, callback) {
+      sandbox.stub(window.chrome.webstore, 'install').callsFake(function (url, callback) {
         assert.ok(false, 'chrome webstore install should not have been called');
       });
-      sandbox.stub(window.chrome.runtime, 'sendMessage', function () {
+      sandbox.stub(window.chrome.runtime, 'sendMessage').callsFake(function () {
         sinon.assert.notCalled(window.chrome.webstore.install);
         done();
       });
@@ -195,13 +195,13 @@ describe('initializeScreenShare', function () {
 
     it('will post an error message back if install fails.', function (done) {
       const webstoreUrl = 'https://test.example';
-      sandbox.stub(window.chrome.webstore, 'install', function (url, callback) {
+      sandbox.stub(window.chrome.webstore, 'install').callsFake(function (url, callback) {
         throw new Error('Chrome Web Store installations can only be initated by a user gesture.');
       });
       const frameWindow = {
         postMessage: () => {}
       };
-      sandbox.stub(frameWindow, 'postMessage', function (msg) {
+      sandbox.stub(frameWindow, 'postMessage').callsFake(function (msg) {
         assert.ok(msg.err);
         done();
       });
@@ -215,18 +215,18 @@ describe('initializeScreenShare', function () {
       this.timeout(3000); // the install process has a timeout of 2500
 
       const webstoreUrl = 'https://test.example';
-      sandbox.stub(window.chrome.webstore, 'install', function (url, callback) {
+      sandbox.stub(window.chrome.webstore, 'install').callsFake(function (url, callback) {
         assert.equal(url, webstoreUrl);
         assert.equal(typeof callback, 'function');
         callback();
       });
-      sandbox.stub(window.chrome.runtime, 'sendMessage', function () {
+      sandbox.stub(window.chrome.runtime, 'sendMessage').callsFake(function () {
         assert.ok(false, 'Passed message to extension after installing.');
       });
       const frameWindow = {
         postMessage: () => {}
       };
-      sandbox.stub(frameWindow, 'postMessage', function (msg) {
+      sandbox.stub(frameWindow, 'postMessage').callsFake(function (msg) {
         assert.ok(msg.installOnly);
         done();
       });
